@@ -16,7 +16,16 @@ _global_script_class_icons={
 [application]
 
 config/name="Zombie Prototype"
+run/main_scene="res://MapScene.tscn"
 config/icon="res://icon.png"
+
+[debug]
+
+settings/stdout/print_fps=true
+
+[display]
+
+window/vsync/use_vsync=false
 
 [rendering]
 
