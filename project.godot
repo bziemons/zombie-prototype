@@ -16,7 +16,7 @@ _global_script_class_icons={
 [application]
 
 config/name="Zombie Prototype"
-run/main_scene="res://MapScene.tscn"
+run/main_scene="res://WorldMap.tscn"
 config/icon="res://icon.png"
 
 [debug]
