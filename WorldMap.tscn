@@ -61,7 +61,7 @@ tile_set = SubResource( 2 )
 cell_custom_transform = Transform2D( 96, 0, 0, 27, 0, 0 )
 cell_half_offset = 0
 format = 1
-tile_data = PoolIntArray( 0, 0, 0 )
+tile_data = PoolIntArray( 0, 0, 0, 65538, 0, 0, 131076, 0, 0 )
 script = ExtResource( 2 )
 
 [node name="Player" parent="." instance=ExtResource( 3 )]

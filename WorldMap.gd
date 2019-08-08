@@ -1,3 +1,4 @@
+
 extends TileMap
 
 func _input(event):
@@ -9,19 +10,31 @@ func _input(event):
 
 func _ready():
 	clear()
-	var tile = Vector2(3, 3)
+	var tile = Vector2(4, 7)
 	
 	set_cellv(tile, 0)
 	for x in range(1000):
 		if x == 0:
-			set_cellv(tile + Vector2(0, -1), 0)
+			if tile.y as int % 2 == 0:
+				set_cellv(tile + Vector2(0, -1), 0)
+			else:
+				set_cellv(tile + Vector2(1, -1), 0)
 		elif  x == 1:
-			set_cellv(tile + Vector2(0, 1), 0)
+			if tile.y as int % 2 == 0:
+				set_cellv(tile + Vector2(0, 1), 1)
+			else:
+				set_cellv(tile + Vector2(1, 1), 1)
 		elif x == 2:
-			set_cellv(tile + Vector2(0, 2), 0)
+			set_cellv(tile + Vector2(0, 2), 2)
 		elif x == 3:
-			set_cellv(tile + Vector2(1, 1), 0)
+			if tile.y as int % 2 == 0:
+				set_cellv(tile + Vector2(-1, 1), 3)
+			else:
+				set_cellv(tile + Vector2(0, 1), 3)
 		elif x == 4:
-			set_cellv(tile + Vector2(1, -1), 0)
+			if tile.y as int % 2 == 0:
+				set_cellv(tile + Vector2(-1, -1), 0)
+			else:
+				set_cellv(tile + Vector2(0, -1), 0)
 		elif x == 5:
 			set_cellv(tile + Vector2(0, -2), 0)
