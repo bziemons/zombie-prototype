@@ -54,6 +54,36 @@ points = PoolVector2Array( 48.3526, 9.2901, 62.8202, 36.7786, 47.3881, 64, 16.52
 3/navigation_offset = Vector2( 0, 0 )
 3/shapes = [  ]
 3/z_index = 0
+4/name = "hexagon.svg 4"
+4/texture = ExtResource( 1 )
+4/tex_offset = Vector2( 0, 0 )
+4/modulate = Color( 0, 1, 1, 1 )
+4/region = Rect2( 0, 0, 64, 64 )
+4/tile_mode = 0
+4/occluder_offset = Vector2( 0, 0 )
+4/navigation_offset = Vector2( 0, 0 )
+4/shapes = [  ]
+4/z_index = 0
+5/name = "hexagon.svg 5"
+5/texture = ExtResource( 1 )
+5/tex_offset = Vector2( 0, 0 )
+5/modulate = Color( 1, 0, 1, 1 )
+5/region = Rect2( 0, 0, 64, 64 )
+5/tile_mode = 0
+5/occluder_offset = Vector2( 0, 0 )
+5/navigation_offset = Vector2( 0, 0 )
+5/shapes = [  ]
+5/z_index = 0
+6/name = "hexagon.svg 6"
+6/texture = ExtResource( 1 )
+6/tex_offset = Vector2( 0, 0 )
+6/modulate = Color( 1, 1, 0, 1 )
+6/region = Rect2( 0, 0, 64, 64 )
+6/tile_mode = 0
+6/occluder_offset = Vector2( 0, 0 )
+6/navigation_offset = Vector2( 0, 0 )
+6/shapes = [  ]
+6/z_index = 0
 
 [node name="WorldTileMap" type="TileMap"]
 mode = 2
@@ -61,7 +91,6 @@ tile_set = SubResource( 2 )
 cell_custom_transform = Transform2D( 96, 0, 0, 27, 0, 0 )
 cell_half_offset = 0
 format = 1
-tile_data = PoolIntArray( 0, 0, 0, 65538, 0, 0, 131076, 0, 0 )
 script = ExtResource( 2 )
 
 [node name="Player" parent="." instance=ExtResource( 3 )]
