@@ -7,9 +7,21 @@ func _input(event):
 			var map_position = world_to_map(event.position)
 			if get_cellv(map_position) != INVALID_CELL:
 				get_node("Player").position = map_to_world(map_position)
+	if event is InputEventMouseButton:
+		if event.button_index == BUTTON_LEFT:
+			var terrainInfoPanel = PopupPanel.new()
+			var terrainInfoLabel = Label.new()
+			
+			var map_position = world_to_map(event.position)
+			if get_cellv(map_position) != INVALID_CELL:
+				self.add_child(terrainInfoPanel)
+				terrainInfoPanel.add_child(terrainInfoLabel)
+				terrainInfoLabel.text = tile_set.tile_get_name(get_cellv(map_position))
+				# Todo: Map panel to a fixed location on the camera
+				terrainInfoPanel.popup(Rect2(Vector2(100, 100), Vector2(200, 100)))
 
 func _ready():
-	clear()
+	clear()	
 	var tile = Vector2(4, 7)
 	
 	set_cellv(tile, 0)
