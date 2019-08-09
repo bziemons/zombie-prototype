@@ -1,5 +1,6 @@
-
 extends TileMap
+
+onready var camera = get_node("Camera2D")
 
 func _input(event):
 	if event is InputEventMouseButton:
@@ -7,7 +8,6 @@ func _input(event):
 			var map_position = world_to_map(event.position)
 			if get_cellv(map_position) != INVALID_CELL:
 				get_node("Player").position = map_to_world(map_position)
-	if event is InputEventMouseButton:
 		if event.button_index == BUTTON_LEFT:
 			var terrainInfoPanel = PopupPanel.new()
 			var terrainInfoLabel = Label.new()
@@ -19,6 +19,9 @@ func _input(event):
 				terrainInfoLabel.text = tile_set.tile_get_name(get_cellv(map_position))
 				# Todo: Map panel to a fixed location on the camera
 				terrainInfoPanel.popup(Rect2(Vector2(100, 100), Vector2(200, 100)))
+	elif event is InputEventMouseMotion:
+		if Input.is_mouse_button_pressed(BUTTON_LEFT):
+			camera.position -= event.relative
 
 func _ready():
 	clear()	
