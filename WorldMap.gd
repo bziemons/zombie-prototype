@@ -1,6 +1,9 @@
 extends TileMap
 
-onready var camera = get_node("Camera2D")
+onready var camera = get_node("../Camera2D")
+var terrainInfoPanel = PopupPanel.new()
+var terrainInfoLabel = Label.new()
+
 #Walking speed is calculated by
 #(normalSpeed * ((tiredness / 100) + (illness / 100) + 1) * ((density / 10) + 1 
 #Event is calculated by
@@ -16,21 +19,13 @@ var tile_type = [
 
 func _input(event):
 	if event is InputEventMouseButton:
-		if event.doubleclick:
-			var map_position = world_to_map(event.position)
-			if get_cellv(map_position) != INVALID_CELL:
-				get_node("Player").position = map_to_world(map_position)
 		if event.button_index == BUTTON_LEFT:
-			var terrainInfoPanel = PopupPanel.new()
-			var terrainInfoLabel = Label.new()
-			
-			var map_position = world_to_map(event.position)
-			if get_cellv(map_position) != INVALID_CELL:
-				self.add_child(terrainInfoPanel)
-				terrainInfoPanel.add_child(terrainInfoLabel)
-				terrainInfoLabel.text = tile_set.tile_get_name(get_cellv(map_position))
-				# Todo: Map panel to a fixed location on the camera
-				terrainInfoPanel.popup(Rect2(Vector2(100, 100), Vector2(200, 100)))
+			if event.pressed:
+				print(world_to_map(event.position + camera.position - get_viewport().size / 2))
+			if event.doubleclick:
+				var map_position = world_to_map(event.position + camera.position - get_viewport().size / 2)
+				if get_cellv(map_position) != INVALID_CELL:
+					get_node("../Player").position = map_to_world(map_position)
 		if event.button_index == BUTTON_RIGHT:
 			if event.pressed == false:
 				terrainInfoPanel.hide()
