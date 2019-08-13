@@ -1,6 +1,10 @@
 extends TileMap
 
 onready var camera = get_node("../Camera2D")
+onready var path2d = get_node("../Path2D")
+onready var curve2d = path2d.get_curve()
+onready var line2d = get_node("../Path2D/Line2D")
+
 var terrainInfoPanel = PopupPanel.new()
 var terrainInfoLabel = Label.new()
 
@@ -17,15 +21,26 @@ var tile_type = [
 	{ "density": 6, "zombie": 4, "raider": 8, "survivor": 4, "name": "forest" } 
 ]
 
+var neighbours_even = [
+	Vector2(1, -1), Vector2(1, 0), Vector2(0, 1),
+	Vector2(-1, 0), Vector2(-1, 1), Vector2(0, -1),
+]
+
+var neighbours_odd = [
+	Vector2(1, 0), Vector2(1, 1), Vector2(0, 1),
+	Vector2(-1, 1), Vector2(-1, 0), Vector2(0, -1),
+]
+
 func _input(event):
 	if event is InputEventMouseButton:
 		if event.button_index == BUTTON_LEFT:
 			if event.pressed:
 				print(world_to_map(event.position + camera.position - get_viewport().size / 2))
+				add_point_to_path(event.position + camera.position - get_viewport().size / 2);
 			if event.doubleclick:
 				var map_position = world_to_map(event.position + camera.position - get_viewport().size / 2)
-				if get_cellv(map_position) != INVALID_CELL:
-					get_node("../Player").position = map_to_world(map_position)
+				#if get_cellv(map_position) != INVALID_CELL:
+					#get_node("../Player").position = map_to_world(map_position)
 		if event.button_index == BUTTON_RIGHT:
 			if event.pressed == false:
 				terrainInfoPanel.hide()
@@ -40,6 +55,8 @@ func _input(event):
 			camera.position -= event.relative
 
 func _ready():
+	get_node("../Player").position = map_to_world(Vector2(0, 0))
+	
 	clear()
 	var tile = Vector2(0, 0)
 	set_cellv(tile, 0)
@@ -78,6 +95,27 @@ func _ready():
 		for b in range(a):
 			set_cellv(tile + Vector2(0, -1), 6)
 			tile += Vector2(0, -1)
+
+func check_neighbours(new_point, previous_point):
+	for i in range(6):
+		if world_to_map(new_point).x as int % 2 == 1:
+			if world_to_map(new_point) + neighbours_odd[i] == world_to_map(previous_point):
+				return true
+		else:
+			if world_to_map(new_point) + neighbours_even[i] == world_to_map(previous_point):
+				return true
+	return false
+
+func set_player_point():
+	curve2d.add_point(get_node("../Player").position)
+	line2d.add_point(get_node("../Player").position)
+
+func add_point_to_path(position):
+	if curve2d.get_point_count() <= 0:
+		set_player_point()
+	if check_neighbours(position, curve2d.get_point_position(curve2d.get_point_count() - 1)):
+		curve2d.add_point(position)
+		line2d.add_point(position)
 
 func get_info(type_id):
 	var info_string = """{name}

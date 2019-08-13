@@ -85,6 +85,10 @@ points = PoolVector2Array( 48.3526, 9.2901, 62.8202, 36.7786, 47.3881, 64, 16.52
 6/shapes = [  ]
 6/z_index = 0
 
+[sub_resource type="Curve2D" id=3]
+_data = {
+"points": PoolVector2Array(  )
+}
 
 [node name="World" type="Node2D"]
 
@@ -105,3 +109,8 @@ drag_margin_left = 0.0
 drag_margin_top = 0.0
 drag_margin_right = 0.0
 drag_margin_bottom = 0.0
+
+[node name="Path2D" type="Path2D" parent="."]
+curve = SubResource( 3 )
+
+[node name="Line2D" type="Line2D" parent="Path2D"]

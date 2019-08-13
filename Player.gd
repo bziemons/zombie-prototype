@@ -9,7 +9,6 @@ var player_size
 func _ready():
 	screen_size = get_viewport_rect().size
 	player_size = get_node("Sprite").texture.get_size()
-	position = (screen_size / 2) - (player_size / 2)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
