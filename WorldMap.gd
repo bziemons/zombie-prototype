@@ -8,6 +8,8 @@ onready var line2d = get_node("../Path2D/Line2D")
 var terrainInfoPanel = PopupPanel.new()
 var terrainInfoLabel = Label.new()
 
+var width = 64
+var heigth = sqrt(3) * (64 / 2)
 #Walking speed is calculated by
 #(normalSpeed * ((tiredness / 100) + (illness / 100) + 1) * ((density / 10) + 1 
 #Event is calculated by
@@ -23,7 +25,7 @@ var tile_type = [
 
 var neighbours_even = [
 	Vector2(1, -1), Vector2(1, 0), Vector2(0, 1),
-	Vector2(-1, 0), Vector2(-1, 1), Vector2(0, -1),
+	Vector2(-1, 0), Vector2(-1, -1), Vector2(0, -1),
 ]
 
 var neighbours_odd = [
@@ -36,9 +38,9 @@ func _input(event):
 		if event.button_index == BUTTON_LEFT:
 			if event.pressed:
 				print(world_to_map(event.position + camera.position - get_viewport().size / 2))
-				add_point_to_path(event.position + camera.position - get_viewport().size / 2);
 			if event.doubleclick:
 				var map_position = world_to_map(event.position + camera.position - get_viewport().size / 2)
+				add_point_to_path(get_tile_center(event.position + camera.position - get_viewport().size / 2));
 				#if get_cellv(map_position) != INVALID_CELL:
 					#get_node("../Player").position = map_to_world(map_position)
 		if event.button_index == BUTTON_RIGHT:
@@ -98,7 +100,7 @@ func _ready():
 
 func check_neighbours(new_point, previous_point):
 	for i in range(6):
-		if world_to_map(new_point).x as int % 2 == 1:
+		if abs(world_to_map(new_point).x) as int % 2 == 1:
 			if world_to_map(new_point) + neighbours_odd[i] == world_to_map(previous_point):
 				return true
 		else:
@@ -106,9 +108,12 @@ func check_neighbours(new_point, previous_point):
 				return true
 	return false
 
+func get_tile_center(position):
+	return map_to_world(world_to_map(position)) + Vector2(width / 2, heigth / 2)
+
 func set_player_point():
-	curve2d.add_point(get_node("../Player").position)
-	line2d.add_point(get_node("../Player").position)
+	curve2d.add_point(get_tile_center(get_node("../Player").position + Vector2(32, 32)))
+	line2d.add_point(get_tile_center(get_node("../Player").position + Vector2(32, 32)))
 
 func add_point_to_path(position):
 	if curve2d.get_point_count() <= 0:
