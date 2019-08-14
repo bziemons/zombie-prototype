@@ -112,10 +112,8 @@ texture_mode = -1518177842
 
 [node name="Camera2D" type="Camera2D" parent="."]
 current = true
-drag_margin_left = 0.0
-drag_margin_top = 0.0
-drag_margin_right = 0.0
-drag_margin_bottom = 0.0
+drag_margin_h_enabled = false
+drag_margin_v_enabled = false
 
 [node name="TravelLayer" type="CanvasLayer" parent="Camera2D"]
 

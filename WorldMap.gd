@@ -7,6 +7,9 @@ onready var path_line = get_node("../Player/Path/PathLine")
 onready var travel_panel = camera.get_node("TravelLayer/TravelPanel")
 onready var travel_label = camera.get_node("TravelLayer/TravelPanel/TravelLabel")
 
+var starttile = Vector2(0, 0)
+var timedone = 0
+var lastgenerated = 0
 var width = 64
 var heigth = sqrt(3) * (64 / 2)
 
@@ -62,9 +65,26 @@ func _ready():
 	path_line.set_joint_mode(path_line.LINE_JOINT_ROUND)
 	
 	clear()
-	var tile = Vector2(0, 0)
-	set_cellv(tile, 0)
-	for a in range(100):
+	set_cellv(starttile, 0)
+
+func _process(delta):
+	timedone += delta
+	var offs = 0.2
+	while (timedone > offs):
+		timedone -= offs
+		generate_level(lastgenerated)
+		lastgenerated += 1
+
+func get_level_from_idx(x):
+	var level = 0
+	while x >= 6:
+		level += 1
+		x = x - (6 * level)
+	return level
+
+func generate_level(level):
+	var tile = Vector2(starttile.x, starttile.y)
+	for a in range(level):
 		for b in range(a):
 			if tile.x as int % 2 == 0:
 				set_cellv(tile + Vector2(1, -1), 1)
