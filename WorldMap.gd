@@ -7,11 +7,15 @@ onready var path_line = get_node("../Player/Path/PathLine")
 onready var travel_panel = camera.get_node("TravelLayer/TravelPanel")
 onready var travel_label = camera.get_node("TravelLayer/TravelPanel/TravelLabel")
 
+const MIN_ZOOM = 1
+const MAX_ZOOM = 3.375
+
 var starttile = Vector2(0, 0)
 var timedone = 0
 var lastgenerated = 0
 var width = 64
 var heigth = sqrt(3) * (64 / 2)
+var target_camera_zoom = 1.0
 
 #Walking speed is calculated by
 #(normalSpeed * ((tiredness / 100) + (illness / 100) + 1) * ((density / 10) + 1 
@@ -48,7 +52,7 @@ func _input(event):
 				add_point_to_path(get_tile_center(event.position + camera.position - get_viewport().size / 2), event.position);
 				#if get_cellv(map_position) != INVALID_CELL:
 					#get_node("../Player").position = map_to_world(map_position)
-		if event.button_index == BUTTON_RIGHT:
+		elif event.button_index == BUTTON_RIGHT:
 			if event.pressed == false:
 				travel_panel.hide()
 				var map_position = world_to_map(event.position + camera.position - get_viewport().size / 2)
@@ -56,9 +60,15 @@ func _input(event):
 					travel_label.text = get_info(tile_set.tile_get_name(get_cellv(map_position)))
 					# TODO: Popup appear at left upper corner if there is not enough space
 					travel_panel.popup(Rect2(event.position + Vector2(width, heigth) / 2, Vector2(100, 50)))
+		elif event.button_index == BUTTON_WHEEL_UP:
+			if event.pressed:
+				target_camera_zoom = max(target_camera_zoom * 2/3, MIN_ZOOM)
+		elif event.button_index == BUTTON_WHEEL_DOWN:
+			if event.pressed:
+				target_camera_zoom = min(target_camera_zoom * 3/2, MAX_ZOOM)
 	elif event is InputEventMouseMotion:
 		if Input.is_mouse_button_pressed(BUTTON_LEFT):
-			camera.position -= event.relative
+			camera.position -= event.relative * camera.zoom
 
 func _ready():
 	get_node("../Player").position = map_to_world(Vector2(0, 0))
@@ -69,6 +79,13 @@ func _ready():
 
 func _process(delta):
 	timedone += delta
+	if target_camera_zoom != camera.zoom.y:
+		if camera.zoom.y > target_camera_zoom:
+			var zoom_factor = clamp(pow(camera.zoom.y - target_camera_zoom + 2 - MIN_ZOOM, 2), 4, 32)
+			camera.zoom = Vector2.ONE * max(camera.zoom.y - delta * zoom_factor, target_camera_zoom)
+		else:
+			var zoom_factor = clamp(pow(target_camera_zoom - camera.zoom.y + 2 - MIN_ZOOM, 2), 4, 32)
+			camera.zoom = Vector2.ONE * min(camera.zoom.y + delta * zoom_factor, target_camera_zoom)
 	var offs = 0.2
 	while (timedone > offs):
 		timedone -= offs
