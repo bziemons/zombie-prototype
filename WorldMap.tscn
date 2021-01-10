@@ -108,8 +108,19 @@ script = ExtResource( 2 )
 curve = SubResource( 3 )
 
 [node name="PathLine" type="Line2D" parent="Player/Path"]
-width = 4.0
+width = 6.0
+default_color = Color( 0.772549, 0.141176, 0.141176, 1 )
 texture_mode = -1518177842
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+round_precision = 16
+antialiased = true
+
+[node name="PathPopupMenu" type="PopupMenu" parent="Player/Path"]
+margin_right = 20.0
+margin_bottom = 20.0
+mouse_default_cursor_shape = 2
 
 [node name="Camera2D" type="Camera2D" parent="."]
 current = true

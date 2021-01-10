@@ -4,6 +4,7 @@ onready var camera = get_node("../Camera2D")
 onready var path = get_node("../Player/Path")
 onready var path_player = path.get_curve()
 onready var path_line = get_node("../Player/Path/PathLine")
+onready var path_popup = get_node("../Player/Path/PathPopupMenu")
 onready var travel_panel = camera.get_node("TravelLayer/TravelPanel")
 onready var travel_label = camera.get_node("TravelLayer/TravelPanel/TravelLabel")
 
@@ -62,7 +63,19 @@ func _input(event):
 						
 			if event.doubleclick:
 				if is_point_in_path(world_position):
-					print("open path menu")
+					
+					# TODO: Keeps vanishing when it was opened before.
+					#	Clear the popup menu first
+					path_popup.clear()
+					
+					#	Set the menus options
+					path_popup.add_item("Remove", 1)
+					path_popup.add_item("other Action")
+					path_popup.connect("id_pressed", self, "path_popup_choice")
+					
+					#	Popup the menu
+					path_popup.popup()
+					path_popup.set_position(world_position)
 				
 		elif event.button_index == BUTTON_RIGHT:
 			if not event.pressed:
@@ -243,6 +256,12 @@ func is_point_in_path(world_position):
 	abs(path_player.get_closest_point(world_position).y - world_position.y) < 32):
 		return true
 	return false
+
+func path_popup_choice(selected_item):
+	if selected_item == 1:
+		
+		print('lel ')
+
 
 func get_info(type_name):
 	var info_string = """{name}
