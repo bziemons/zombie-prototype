@@ -108,12 +108,11 @@ script = ExtResource( 2 )
 curve = SubResource( 3 )
 
 [node name="PathLine" type="Line2D" parent="Player/Path"]
+width = 4.0
 texture_mode = -1518177842
 
 [node name="Camera2D" type="Camera2D" parent="."]
 current = true
-drag_margin_h_enabled = false
-drag_margin_v_enabled = false
 
 [node name="TravelLayer" type="CanvasLayer" parent="Camera2D"]
 

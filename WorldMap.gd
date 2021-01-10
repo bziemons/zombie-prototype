@@ -2,7 +2,7 @@ extends TileMap
 
 onready var camera = get_node("../Camera2D")
 onready var path = get_node("../Player/Path")
-onready var path_curve = path.get_curve()
+onready var path_player = path.get_curve()
 onready var path_line = get_node("../Player/Path/PathLine")
 onready var travel_panel = camera.get_node("TravelLayer/TravelPanel")
 onready var travel_label = camera.get_node("TravelLayer/TravelPanel/TravelLabel")
@@ -42,24 +42,43 @@ var neighbours_odd = [
 ]
 
 func _input(event):
+	var world_position = event.position + camera.position - get_viewport().size / 2
+	var map_position = world_to_map(world_position)
 	if event is InputEventMouseButton:
 		if event.button_index == BUTTON_LEFT:
 			if event.pressed:
-				travel_panel.hide()
-				print(world_to_map(event.position + camera.position - get_viewport().size / 2))
+				# Todo:	Feels kinda unresponsive sometimes, need to be overlooked
+				# 		and maybe redone.
+				
+				#	Check wheter the selected tile, at the world_position, is in
+				#	the path already, or not.
+				if !is_point_in_path(world_position):
+					
+					#	Add the position of every tile between the selected and
+					#	the last position in the path to the path, including the
+					#	selected one.
+					for point in find_path(map_position, world_to_map(path_player.get_point_position(path_player.get_point_count() - 1))):
+						add_point_to_path(get_tile_center(map_to_world(point)), event.position);
+						
 			if event.doubleclick:
-				var map_position = world_to_map(event.position + camera.position - get_viewport().size / 2)
-				add_point_to_path(get_tile_center(event.position + camera.position - get_viewport().size / 2), event.position);
-				#if get_cellv(map_position) != INVALID_CELL:
-					#get_node("../Player").position = map_to_world(map_position)
+				if is_point_in_path(world_position):
+					print("open path menu")
+				
 		elif event.button_index == BUTTON_RIGHT:
-			if event.pressed == false:
+			if not event.pressed:
 				travel_panel.hide()
-				var map_position = world_to_map(event.position + camera.position - get_viewport().size / 2)
 				if get_cellv(map_position) != INVALID_CELL:
 					travel_label.text = get_info(tile_set.tile_get_name(get_cellv(map_position)))
 					# TODO: Popup appear at left upper corner if there is not enough space
 					travel_panel.popup(Rect2(event.position + Vector2(width, heigth) / 2, Vector2(100, 50)))
+					
+					#	Move the player for every point in the path.
+					for i in path_player.get_point_count():
+						get_node("../Player").position = path_player.get_point_position(i) - Vector2(width/2, heigth/2)
+					
+					#	Clear all points in the path, erase the line.
+					path_player.clear_points()
+					path_line.clear_points()
 		elif event.button_index == BUTTON_WHEEL_UP:
 			if event.pressed:
 				target_camera_zoom = max(target_camera_zoom * 2/3, MIN_ZOOM)
@@ -137,6 +156,30 @@ func generate_level(level):
 			set_cellv(tile + Vector2(0, -1), 6)
 			tile += Vector2(0, -1)
 
+#	Values:map_position; returns map_position[]
+#	Description:
+#	Returns every neighbour of the point at the given value map_position.
+func get_neighbours(map_position):
+	var neighbours = []
+	for i in range(6):
+		if abs(map_position.x) as int % 2 == 1:
+				neighbours.append(neighbours_odd[i] + map_position)
+		else:
+				neighbours.append(neighbours_even[i] + map_position)
+	return neighbours
+
+#	Values: new_map_position, previous_map_position; return boolean
+#	Description:
+#	Checks wheter or not the points at the location of both given values are
+#	neighbours.
+func is_neighbour(new_map_position, previous_map_position):
+	var neighbours = get_neighbours(previous_map_position)
+	if(neighbours.has(new_map_position)):
+		return true
+	else:
+		return false
+
+#deprecated
 func check_neighbours(new_point, previous_point):
 	for i in range(6):
 		if abs(world_to_map(new_point).x) as int % 2 == 1:
@@ -147,22 +190,59 @@ func check_neighbours(new_point, previous_point):
 				return true
 	return false
 
-func get_tile_center(position):
-	return map_to_world(world_to_map(position)) + Vector2(width / 2, heigth / 2)
+#	Values: world_position; return world_position
+#	Description:
+#	Returns the center of the tile, that is located at the given world_position.
+func get_tile_center(world_position):
+	return map_to_world(world_to_map(world_position)) + Vector2(width / 2, heigth / 2)
 
+#	Description:
+#	Sets the first points in both, the path_player and the path_line.
 func set_player_point():
-	path_curve.add_point(get_tile_center(get_node("../Player").position + Vector2(32, 32)))
-	path_line.add_point(get_tile_center(get_node("../Player").position + Vector2(32, 32)))
+	
+	#	Set the players position as the first point, absolute to the map.
+	path_player.add_point(get_node("../Player").position + Vector2(32, 32))
+	
+	#	Set the first point in the line to the center, since the path is relative
+	#	to the player.
+	path_line.add_point(Vector2(32, 32))
 
-func add_point_to_path(position, popup_position):
-	if path_curve.get_point_count() <= 0:
+#	Values: world_position, world_popup_position; return void
+#	Description:
+#	Adds a point to the path at the location of the given value world_position
+#	and also create a popup with details to the path.
+func add_point_to_path(world_position, world_popup_position):
+	
+	#	Set the players position as the first point in the path, if the path is
+	#	empty.
+	if path_player.get_point_count() <= 0:
 		set_player_point()
-	if check_neighbours(position, path_curve.get_point_position(path_curve.get_point_count() - 1)):
-		path_curve.add_point(position)
-		path_line.add_point(position)
+		
+	#	Check wheter the world_position is a neighbour of the last point in the
+	#	path or not.
+	if is_neighbour(world_to_map(world_position), world_to_map(path_player.get_point_position(path_player.get_point_count() - 1))):
+		
+		#	Add the world_position to the path.
+		path_player.add_point(world_position)
+		var path_index = path_player.get_point_count() - 1
+		
+		#	Locate the last direction vector and add it to the line.
+		# TODO: Seems to not be working with a negative y, gotta look this up
+		path_line.add_point((path_player.get_point_position(path_index) - path_player.get_point_position(path_index - 1))
+		+ path_line.get_point_position(path_line.get_point_count() - 1))
+		
 		# TODO: Calculate and alter the travel duration
 		travel_label.text = "EST. Arrival: 10 Years"
-		travel_panel.popup(Rect2(popup_position, Vector2(100, 50)))
+		travel_panel.popup(Rect2(world_popup_position, Vector2(100, 50)))
+
+#	Values: world_position; returns boolean
+#	Description:
+#	Checks if the given value world_position is already a point in the path.
+func is_point_in_path(world_position):
+	if(abs(path_player.get_closest_point(world_position).x - world_position.x) < 32 &&
+	abs(path_player.get_closest_point(world_position).y - world_position.y) < 32):
+		return true
+	return false
 
 func get_info(type_name):
 	var info_string = """{name}
@@ -177,4 +257,40 @@ func get_info(type_name):
 
 func get_density(type_name):
 	return tile_type.get(type_name).density
+
+func cube_to_oddq(cube):
+	var col = cube.x
+	var row = cube.z + (cube.x - (int(cube.x)&1)) / 2
+	return Vector2(col, row)
+
+func oddq_to_cube(hex):
+	var x = hex.x
+	var z = hex.y - (hex.x - (int(hex.x)&1)) / 2
+	var y = -x-z
+	return Vector3(x, y, z)
+
+func offset_distance(a, b):
+	var ac = oddq_to_cube(a)
+	var bc = oddq_to_cube(b)
+	return cube_distance(ac, bc)
+
+func cube_distance(a, b):
+	return (abs(a.x - b.x) + abs(a.y - b.y) + abs(a.z - b.z)) / 2
+
+func find_path(start, goal):
+	var path = []
+	var next = start;
+	path.append(next)
 	
+	for i in offset_distance(start, goal):
+		var temp
+		for neighbour in get_neighbours(next):
+			if temp == null:
+				temp = offset_distance(neighbour, goal)
+				next = neighbour
+			elif temp > offset_distance(neighbour, goal):
+				temp = offset_distance(next, goal)
+				next = neighbour
+		path.append(next)
+	path.invert()
+	return path

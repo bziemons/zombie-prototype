@@ -19,10 +19,6 @@ config/name="Zombie Prototype"
 run/main_scene="res://WorldMap.tscn"
 config/icon="res://icon.png"
 
-[debug]
-
-settings/stdout/print_fps=true
-
 [display]
 
 window/vsync/use_vsync=false
