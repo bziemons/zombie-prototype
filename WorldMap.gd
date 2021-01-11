@@ -2,6 +2,7 @@ extends TileMap
 
 onready var camera = get_node("../Camera2D")
 onready var path = get_node("../Player/Path")
+onready var path_array = []
 onready var path_player = path.get_curve()
 onready var path_line = get_node("../Player/Path/PathLine")
 onready var path_popup = get_node("../Player/Path/PathPopupMenu")
@@ -53,12 +54,15 @@ func _input(event):
 				
 				#	Check wheter the selected tile, at the world_position, is in
 				#	the path already, or not.
+				print(str(!is_point_in_path(world_position)))
 				if !is_point_in_path(world_position):
-					
+					if path_array.empty():
+						set_player_point()
+						
 					#	Add the position of every tile between the selected and
 					#	the last position in the path to the path, including the
 					#	selected one.
-					for point in find_path(map_position, world_to_map(path_player.get_point_position(path_player.get_point_count() - 1))):
+					for point in find_path(map_position, path_array[len(path_array) - 1]):
 						add_point_to_path(get_tile_center(map_to_world(point)), event.position);
 						
 			if event.doubleclick:
@@ -86,11 +90,12 @@ func _input(event):
 					travel_panel.popup(Rect2(event.position + Vector2(width, heigth) / 2, Vector2(100, 50)))
 					
 					#	Move the player for every point in the path.
-					for i in path_player.get_point_count():
-						get_node("../Player").position = path_player.get_point_position(i) - Vector2(width/2, heigth/2)
+					if !path_array.empty():
+						for i in len(path_array):
+							get_node("../Player").position = map_to_world(path_array[i])
 					
 					#	Clear all points in the path, erase the line.
-					path_player.clear_points()
+					path_array.clear()
 					path_line.clear_points()
 		elif event.button_index == BUTTON_WHEEL_UP:
 			if event.pressed:
@@ -210,11 +215,11 @@ func get_tile_center(world_position):
 	return map_to_world(world_to_map(world_position)) + Vector2(width / 2, heigth / 2)
 
 #	Description:
-#	Sets the first points in both, the path_player and the path_line.
+#	Sets the first points in both, the path_array and the path_line.
 func set_player_point():
 	
 	#	Set the players position as the first point, absolute to the map.
-	path_player.add_point(get_node("../Player").position + Vector2(32, 32))
+	path_array.append(world_to_map(get_node("../Player").position + Vector2(32, 32)))
 	
 	#	Set the first point in the line to the center, since the path is relative
 	#	to the player.
@@ -228,38 +233,44 @@ func add_point_to_path(world_position, world_popup_position):
 	
 	#	Set the players position as the first point in the path, if the path is
 	#	empty.
-	if path_player.get_point_count() <= 0:
+	if path_array.empty():
 		set_player_point()
 		
 	#	Check wheter the world_position is a neighbour of the last point in the
 	#	path or not.
-	if is_neighbour(world_to_map(world_position), world_to_map(path_player.get_point_position(path_player.get_point_count() - 1))):
+	if is_neighbour(world_to_map(world_position), path_array[len(path_array) - 1]):
 		
 		#	Add the world_position to the path.
-		path_player.add_point(world_position)
-		var path_index = path_player.get_point_count() - 1
+		path_array.append(world_to_map(world_position))
+		var path_index = len(path_array) - 1
 		
 		#	Locate the last direction vector and add it to the line.
 		# TODO: Seems to not be working with a negative y, gotta look this up
-		path_line.add_point((path_player.get_point_position(path_index) - path_player.get_point_position(path_index - 1))
+		path_line.add_point(map_to_world(path_array[path_index]) - map_to_world(path_array[path_index - 1])
 		+ path_line.get_point_position(path_line.get_point_count() - 1))
 		
 		# TODO: Calculate and alter the travel duration
-		travel_label.text = "EST. Arrival: 10 Years"
+		travel_label.text = str(world_to_map(world_position))
 		travel_panel.popup(Rect2(world_popup_position, Vector2(100, 50)))
+
+#	Values: world_position; return void
+#	Description:
+#	Removes a point and concat the path at this position.
+func remove_point_from_path(world_position):
+	print('split path here')
 
 #	Values: world_position; returns boolean
 #	Description:
 #	Checks if the given value world_position is already a point in the path.
 func is_point_in_path(world_position):
-	if(abs(path_player.get_closest_point(world_position).x - world_position.x) < 32 &&
-	abs(path_player.get_closest_point(world_position).y - world_position.y) < 32):
+	if world_to_map(world_position) in path_array:
+		print(str(world_to_map(world_position) in path_array))
 		return true
 	return false
 
 func path_popup_choice(selected_item):
 	if selected_item == 1:
-		
+		remove_point_from_path(self.position)
 		print('lel ')
 
 
