@@ -55,19 +55,23 @@ func _input(event):
 				# Todo:	Feels kinda unresponsive sometimes, need to be overlooked
 				# 		and maybe redone.
 				
+				#	Check wheter or not the popup is visible, at the moment.
+				if !path_popup.visible:
+					
 				#	Check wheter the selected tile, at the world_position, is in
 				#	the path already, or not.
-				print(str(!is_point_in_path(world_position)))
-				if !is_point_in_path(world_position):
-					if path_array.empty():
-						set_player_point()
+					if !is_point_in_path(world_position):
+						if path_array.empty():
+							set_player_point()
+							
+						#	Add the position of every tile between the selected and
+						#	the last position in the path to the path, including the
+						#	selected one.
+						for point in find_path(map_position, path_array[len(path_array) - 1]):
+							add_point_to_path(get_tile_center(map_to_world(point)), event.position);
+							
 						
-					#	Add the position of every tile between the selected and
-					#	the last position in the path to the path, including the
-					#	selected one.
-					for point in find_path(map_position, path_array[len(path_array) - 1]):
-						add_point_to_path(get_tile_center(map_to_world(point)), event.position);
-						
+					
 			if event.doubleclick:
 				if is_point_in_path(world_position):
 					
@@ -273,7 +277,10 @@ func is_point_in_path(world_position):
 	if world_to_map(world_position) in path_array:
 		return true
 	return false
-						 
+
+#	Values: selected_item; returns void
+#	Description:
+#	Action depending on the selected item in the path_popup. 
 func path_popup_choice(selected_item):
 	if selected_item == 1:
 		remove_point_from_path(last_world_position)
