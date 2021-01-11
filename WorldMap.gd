@@ -19,6 +19,9 @@ var width = 64
 var heigth = sqrt(3) * (64 / 2)
 var target_camera_zoom = 1.0
 
+# TODO: Find better solution
+var last_world_position
+
 #Walking speed is calculated by
 #(normalSpeed * ((tiredness / 100) + (illness / 100) + 1) * ((density / 10) + 1 
 #Event is calculated by
@@ -80,6 +83,7 @@ func _input(event):
 					#	Popup the menu
 					path_popup.popup()
 					path_popup.set_position(world_position)
+					last_world_position = world_position
 				
 		elif event.button_index == BUTTON_RIGHT:
 			if not event.pressed:
@@ -257,21 +261,23 @@ func add_point_to_path(world_position, world_popup_position):
 #	Description:
 #	Removes a point and concat the path at this position.
 func remove_point_from_path(world_position):
-	print('split path here')
+	if world_to_map(world_position) in path_array:
+		for i in len(path_array) - path_array.find(world_to_map(world_position)):
+			path_line.remove_point(len(path_array) - 1)
+			path_array.pop_back()
 
 #	Values: world_position; returns boolean
 #	Description:
 #	Checks if the given value world_position is already a point in the path.
 func is_point_in_path(world_position):
 	if world_to_map(world_position) in path_array:
-		print(str(world_to_map(world_position) in path_array))
 		return true
 	return false
-
+						 
 func path_popup_choice(selected_item):
 	if selected_item == 1:
-		remove_point_from_path(self.position)
-		print('lel ')
+		remove_point_from_path(last_world_position)
+		print("lel")
 
 
 func get_info(type_name):
