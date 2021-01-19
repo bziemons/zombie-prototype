@@ -56,28 +56,21 @@ func _input(event):
 	_world_position = event.position + camera.position - get_viewport().size / 2
 	var map_position = world_to_map(_world_position)
 	if event is InputEventMouseButton:
-		#if event.button_index == BUTTON_LEFT:
-			#if event.pressed:
-				#print("nothing happens")
-			#if event.doubleclick:
-				#print("nothing happens")
-				#if is_point_in_path(world_position):
-					
-
-
 		if event.button_index == BUTTON_RIGHT and event.pressed:
 			print("works")
 			#	Clear the popup menu first
 			popup_menu.clear()
 			
-			#	Set the menus options
+			#	Set the menu options
 			popup_menu.add_item("Add to path", 0)
 			popup_menu.add_item("Remove till here", 1)
-			popup_menu.add_item("Details", 1)
+			popup_menu.add_item("Move", 2)
+			popup_menu.add_item("Details", 3)
 			
 			if _selected_character == null:
 				popup_menu.set_item_disabled(0, true)
 				popup_menu.set_item_disabled(1, true)
+				popup_menu.set_item_disabled(2, true)
 			
 			popup_menu.connect("id_pressed", self, "_on_id_pressed")
 			
@@ -85,24 +78,6 @@ func _input(event):
 			popup_menu.popup()
 			popup_menu.set_position(_world_position)
 				
-				#	Check wheter or not the popup is visible, at the moment.
-				#if not path_popup.visible:
-					
-			#if not event.pressed:
-				#travel_panel.hide()
-				#if get_cellv(map_position) != INVALID_CELL:
-					#travel_label.text = get_info(tile_set.tile_get_name(get_cellv(map_position)))
-					# TODO: Popup appear at left upper corner if there is not enough space
-					#travel_panel.popup(Rect2(event.position + Vector2(width, heigth) / 2, Vector2(100, 50)))
-					
-					#	Move the player for every point in the path.
-					#if !path_array.empty():
-						#for i in len(path_array):
-							#get_node("../Player").position = map_to_world(path_array[i])
-					
-					#	Clear all points in the path, erase the line.
-					#path_array.clear()
-					#path_line.clear_points()
 		elif event.button_index == BUTTON_WHEEL_UP:
 			if event.pressed:
 				target_camera_zoom = max(target_camera_zoom * 2/3, MIN_ZOOM)
@@ -249,10 +224,10 @@ func get_tile_center(world_position: Vector2) -> Vector2:
 func _on_id_pressed(id: int):
 	if id == 0:
 		emit_signal("character_action", _selected_character, 0, popup_menu.rect_position)
-		print("lül")
 	elif id == 1:
-		#remove_point_from_path(last_world_position)
-		print("lel")
+		emit_signal("character_action", _selected_character, 1, popup_menu.rect_position)
+	elif id == 2:
+		emit_signal("character_action", _selected_character, 2, popup_menu.rect_position)
 
 
 func get_info(type_name):
